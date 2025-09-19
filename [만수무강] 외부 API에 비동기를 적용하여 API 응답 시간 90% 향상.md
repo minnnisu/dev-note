@@ -1,17 +1,21 @@
 # [만수무강] 외부 API에 비동기를 적용하여 API 응답 시간 90% 향상
 
-만수무강에서는 사용자가 음성을 녹음하고 저장하면, 이를 텍스트로 변환하고 서버에 녹음 파일과 변환된 텍스트를 함께 저장하는 기능을 제공하고 있습니다.
+저희 [만수무강](https://github.com/Team-MansuMugang)에서는 사용자가 음성을 녹음하고 저장하면, 이를 텍스트로 변환하고 서버에 녹음 파일과 변환된 텍스트를 함께 저장하는 기능을 제공하고 있습니다.
 
-<img width="1000" alt="image" src="https://github.com/user-attachments/assets/62a5b29c-9e0d-4c69-9e00-3b53cc465eae" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/62a5b29c-9e0d-4c69-9e00-3b53cc465eae" />
 
 하지만 초기 구현에서는 음성 파일을 서버에 저장할 때 **2~3초의 높은 응답 지연이 발생**하여 사용자 경험에 영향을 주고 있었습니다.  
 더 나은 사용자 경험을 위해 파일 저장 과정에서 발생하는 병목을 해결하고자 합니다.
+
+<br>
 
 ## 1. 병목 지점 파악
 서버는 음성을 받아 OpenAI에서 제공하는 Whisper API(STT, Speech-To-Text)를 호출하여 텍스트 변환을 진행합니다.  
 
 음성 저장 API를 디버깅한 결과, Whisper API를 호출하고 응답을 받아오는 과정에서 대부분의 시간이 소요되고 있음을 확인했습니다.  
 즉, **외부 API 호출만 개선해도 전체 API 지연 시간을 크게 줄일 수 있다고 판단**했습니다.
+
+<br>
 
 ## 2. 병목 지점 개선 방안
 아래는 기존의 음성 녹음을 저장하는 API의 Service 레이어 로직입니다.
@@ -92,7 +96,7 @@ public RecordSave.Dto saveRecord(User user, Transcription.Request request) {
     }
 }
 ```
-```
+```java
 @Service
 @RequiredArgsConstructor
 public class RecordAsyncService {
@@ -117,9 +121,11 @@ public class RecordAsyncService {
 
 ```
 
+<br>
+
 ## 3. 병목 지점 개선 결과
 
-<img width="1000" alt="image" src="https://github.com/user-attachments/assets/bf1ff6a7-edab-4007-8b4b-651787c9abf7" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/bf1ff6a7-edab-4007-8b4b-651787c9abf7" />
 
 Postman으로 음성 저장 API를 다시 호출해본 결과,
 응답 시간이 100~200ms 수준으로 약 90% 개선되었습니다.
