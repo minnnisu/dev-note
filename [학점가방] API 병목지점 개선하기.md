@@ -182,7 +182,7 @@ Hibernate: select dl1_0.id,dl1_0.academic_year,dl1_0.area,dl1_0.classroom,dl1_0.
 ```
 
 - JPA의 **fetch join**을 적용하여 `Assignment` 엔티티를 조회할 때 `Lecture` 엔티티를 함께 가져오도록 수정하였습니다. 이를 통해 단일 쿼리로 필요한 데이터를 한 번에 조회할 수 있습니다.
-```
+``` java
 @Query("select a from Assignment a join fetch a.lecture join fetch a.user where a.user = :user")
 List<Assignment> findAllByUser(@Param("user") User user);
 ```
@@ -198,8 +198,14 @@ List<Assignment> findAllByUser(@Param("user") User user);
 
 `fetch join`을 적용하여 단일 쿼리로 데이터를 조회함으로써 병목 현상을 해소할 수 있었고, 실제로 95% 구간에서의 지연시간이 38% 감소하였으며, 처리량 또한 개선되었습니다.  
 
+<img width="500" height="271" alt="image" src="https://github.com/user-attachments/assets/dfbae77d-5a64-4746-b810-dd936b2bb2e4" />
+
+또한 개선 전과 비교하여 runnable 상태의 thread가 대폭 증가하여 병목이 확실히 개선됨을 알 수 있습니다.
+
+
 불필요한 쿼리 호출로 인한 DB 부하가 줄어들면서 전체적인 성능이 안정화되었다고 해석됩니다.
 
+<br>
 
 ## 실험결과 첨부파일
 > 개선 전 부하 테스트 Report
