@@ -158,8 +158,10 @@ CPU가 4코어 환경임을 고려하면 이는 약 21% 수준으로, 여전히 
 | 전 | 13s | 30.85/s |
 | 후 | 13s | 31.36/s |
 
-#### 결론
-- 기존과 비교하여 큰 변화가 없었으며 단순히 `user_id` 컬럼에 인덱스를 추가하는 것으로는 성능 향상을 얻을 수 없었습니다.
+#### 결과
+기존과 비교하여 큰 변화가 없었으며 단순히 `user_id` 컬럼에 인덱스를 추가하는 것으로는 성능 향상을 얻을 수 없었습니다.
+
+<br>
 
 ### 4-2. N+1 문제
 
@@ -175,7 +177,8 @@ Hibernate: select dl1_0.id,dl1_0.academic_year,dl1_0.area,dl1_0.classroom,dl1_0.
 Hibernate: select dl1_0.id,dl1_0.academic_year,dl1_0.area,dl1_0.classroom,dl1_0.completion_type,dl1_0.course_code,dl1_0.course_format,dl1_0.course_name,dl1_0.course_type,dl1_0.credits,dl1_0.curriculum,dl1_0.engineering_accreditation,dl1_0.evaluation_method,dl1_0.grade_type,dl1_0.instructor,dl1_0.offering_college,dl1_0.offering_department,dl1_0.offering_major,dl1_0.practical,dl1_0.remarks,dl1_0.semester,dl1_0.target_grade,dl1_0.team_teaching,dl1_0.theory from dg_lecture dl1_0 where dl1_0.id=?
 ```
 
-- JPA의 **fetch join**을 적용하여 `Assignment` 엔티티를 조회할 때 `Lecture` 엔티티를 함께 가져오도록 수정하였습니다. 이를 통해 단일 쿼리로 필요한 데이터를 한 번에 조회할 수 있습니다.
+JPA의 **fetch join**을 적용하여 `Assignment` 엔티티를 조회할 때 `Lecture` 엔티티를 함께 가져오도록 수정하였습니다. 이를 통해 단일 쿼리로 필요한 데이터를 한 번에 조회할 수 있습니다.
+
 ``` java
 @Query("select a from Assignment a join fetch a.lecture join fetch a.user where a.user = :user")
 List<Assignment> findAllByUser(@Param("user") User user);
@@ -187,7 +190,7 @@ List<Assignment> findAllByUser(@Param("user") User user);
 | 전 | 13s | 30.85/s |
 | 후 | 7s | 47.36/s |
 
-#### 결론  
+#### 결과 
 성능 저하의 원인은 `Assignment` 엔티티에서 `Lecture` 엔티티를 추가 조회하는 과정에서 발생한 **N+1 문제**였습니다.
 
 `fetch join`을 적용하여 단일 쿼리로 데이터를 조회함으로써 병목 현상을 해소할 수 있었고, 실제로 95% 구간에서의 지연시간이 38% 감소하였으며, 처리량 또한 개선되었습니다.  
